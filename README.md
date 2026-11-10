@@ -1,1 +1,1 @@
-# graph-ai
+# Atlas-chat
