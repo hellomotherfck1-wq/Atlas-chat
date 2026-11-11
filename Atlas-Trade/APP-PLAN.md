@@ -66,7 +66,7 @@ Bu belge, mevcut Grok sohbeti talimatlarini calisan, mobil uyumlu ve 15 dakikada
 - **Sinyaller**: Coin, yon (Spot AL veya izleme), giris bolgesi, stop, hedefler, R:R, guven, zaman damgasi.
 - **Sinyal detayi**: Altı ajanin gerekceleri, veri snapshot'i ve reddedilme nedenleri.
 - **Paper portfoy**: Sanal bakiye, acik sanal pozisyonlar, gerceklesmis/gerceklesmemis PnL.
-- **Performans**: Kazanma orani, profit factor, max drawdown, ortalama R, islem sayisi ve donem bazli karsilastirma.
+- **Performans (ayri sayfa)**: Genel paper portfoy net getiri (%) ve USDT, bot bazli net PnL/getiri (%), kazanma orani, profit factor, max drawdown, ortalama R, islem sayisi, donem filtresi ve bot karar gecmisi. Ayrintilar: docs/performance-dashboard.md.
 - **Ayarlar**: Tarama evreni, risk limitleri, sanal bakiye ve bildirimler.
 
 ## Dagitim gereksinimi
