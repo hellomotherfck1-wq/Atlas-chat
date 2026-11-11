@@ -3,9 +3,10 @@ import asyncio, json, os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 import httpx
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .engine import analyze_klines
+from .backtest import run_backtest
 from .store import connect, init_db
 
 BASE = "https://data-api.binance.vision"
@@ -167,6 +168,16 @@ def performance(period: str = "all"):
             "average_pnl":sum(pnls)/len(pnls) if pnls else None,"average_r":sum(r_values)/len(r_values) if r_values else None,
             "max_drawdown_pct":max_dd if rows else None,"wins":wins,"losses":losses,
             "sample_warning":len(rows)<20,"trades":[dict(r) for r in rows]}
+
+
+@app.get("/api/backtest")
+async def historical_backtest(days: int = Query(90, ge=1, le=180),
+                              symbols: int = Query(10, ge=1, le=20)):
+    """Run a historical-only simulation. This endpoint never submits exchange orders."""
+    try:
+        return await run_backtest(days=days, symbol_limit=symbols)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Backtest failed: {str(exc)[:240]}") from exc
 
 @app.get("/api/agents")
 def agents():
