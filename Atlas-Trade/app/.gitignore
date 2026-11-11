@@ -1,0 +1,6 @@
+backend/__pycache__/
+backend/.pytest_cache/
+backend/atlas.db
+frontend/node_modules/
+frontend/dist/
+.env
