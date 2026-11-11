@@ -1,0 +1,38 @@
+# Atlas Paper Trading varsayilanlari
+# Bu dosya yalnizca sanal simulasyon icindir.
+
+mode: paper
+exchange: binance_spot
+scan_interval_minutes: 15
+universe:
+  quote_asset: USDT
+  max_symbols: 50
+  min_quote_volume_usdt_24h: 10000000
+  exclude_assets:
+    - USDC
+    - USDT
+    - BUSD
+    - FDUSD
+    - TUSD
+    - USDP
+    - DAI
+  exclude_leveraged_tokens: true
+  require_spot_trading_status: TRADING
+portfolio:
+  initial_virtual_quote_balance: 10000
+  quote_asset: USDT
+risk:
+  max_risk_per_trade_pct: 1.0
+  max_daily_loss_pct: 3.0
+  max_weekly_loss_pct: 7.0
+  max_open_positions: 3
+  minimum_reward_to_risk: 2.0
+execution_simulation:
+  fee_rate_bps: 10
+  slippage_bps: 5
+  fill_on_next_bar: true
+  use_closed_candles_only: true
+safety:
+  live_orders_enabled: false
+  api_credentials_required: false
+  withdrawals_enabled: false
