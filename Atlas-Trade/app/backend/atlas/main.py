@@ -42,6 +42,10 @@ def record_signal(item, candle_key):
             open_count = db.execute("SELECT COUNT(*) FROM trades WHERE status='OPEN'").fetchone()[0]
             balance = float(db.execute("SELECT value FROM meta WHERE key='initial_balance'").fetchone()[0])
             equity = balance + (db.execute("SELECT COALESCE(SUM(pnl),0) FROM trades WHERE status='CLOSED'").fetchone()[0])
+            daily_pnl = db.execute("SELECT COALESCE(SUM(pnl),0) FROM trades WHERE status='CLOSED' AND date(closed_at)=date('now')").fetchone()[0]
+            weekly_pnl = db.execute("SELECT COALESCE(SUM(pnl),0) FROM trades WHERE status='CLOSED' AND closed_at >= datetime('now','-7 days')").fetchone()[0]
+            if daily_pnl <= -balance * 0.03 or weekly_pnl <= -balance * 0.07:
+                return
             risk_cash = equity * RISK_FRACTION
             qty = risk_cash / max(item["entry"] - item["stop"], item["entry"] * 0.001)
             cost = qty * item["entry"] * (1 + SLIPPAGE + FEE)
@@ -99,8 +103,9 @@ async def scan_once():
 
 async def scheduler():
     while True:
+        started = asyncio.get_running_loop().time()
         await scan_once()
-        await asyncio.sleep(900)
+        await asyncio.sleep(max(1, 900 - (asyncio.get_running_loop().time() - started)))
 
 @asynccontextmanager
 async def lifespan(app):
@@ -150,10 +155,17 @@ def performance(period: str = "all"):
     pnls = [float(r["pnl"] or 0) for r in rows]
     wins = sum(x>0 for x in pnls); losses = sum(x<0 for x in pnls)
     gross_win=sum(x for x in pnls if x>0); gross_loss=abs(sum(x for x in pnls if x<0))
+    equity=10000.0; peak=equity; max_dd=0.0; r_values=[]
+    for row in rows:
+        pnl=float(row["pnl"] or 0); equity+=pnl; peak=max(peak,equity)
+        if peak: max_dd=max(max_dd,(peak-equity)/peak*100)
+        risk=max((float(row["entry"])-float(row["stop"]))*float(row["quantity"]),0.000001)
+        r_values.append(pnl/risk)
     return {"trade_count":len(rows),"net_pnl":sum(pnls),"return_pct":sum(pnls)/10000*100,
             "win_rate":wins/len(rows)*100 if rows else None,
             "profit_factor":gross_win/gross_loss if gross_loss else (None if not gross_win else "infinity"),
-            "average_pnl":sum(pnls)/len(rows) if rows else None,"wins":wins,"losses":losses,
+            "average_pnl":sum(pnls)/len(pnls) if pnls else None,"average_r":sum(r_values)/len(r_values) if r_values else None,
+            "max_drawdown_pct":max_dd if rows else None,"wins":wins,"losses":losses,
             "sample_warning":len(rows)<20,"trades":[dict(r) for r in rows]}
 
 @app.get("/api/agents")
