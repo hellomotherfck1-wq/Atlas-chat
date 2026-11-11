@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 def test_api_smoke(monkeypatch):
     fd,path=tempfile.mkstemp(); os.close(fd)
     monkeypatch.setenv("ATLAS_DB",path)
+    monkeypatch.setenv("ATLAS_DISABLE_SCHEDULER","1")
     from atlas import store
     store.DB_PATH=path
     from atlas.main import app
