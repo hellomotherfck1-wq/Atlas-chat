@@ -144,7 +144,7 @@ def portfolio():
         opened = db.execute("SELECT * FROM trades WHERE status='OPEN'").fetchall()
         return {"initial_balance":balance,"realized_pnl":closed,"equity":balance+closed,
                 "return_pct":closed/balance*100,"open_trades":[dict(x) for x in opened],
-                "closed_trades":db.execute("SELECT * FROM trades WHERE status='CLOSED' ORDER BY id DESC LIMIT 100").fetchall().__iter__().__next__() if False else [dict(x) for x in db.execute("SELECT * FROM trades WHERE status='CLOSED' ORDER BY id DESC LIMIT 100").fetchall()]}
+                "closed_trades":[dict(x) for x in db.execute("SELECT * FROM trades WHERE status='CLOSED' ORDER BY id DESC LIMIT 100").fetchall()]}
 
 @app.get("/api/performance")
 def performance(period: str = "all"):
