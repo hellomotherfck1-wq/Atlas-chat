@@ -106,11 +106,12 @@ async def scheduler():
 async def lifespan(app):
     global STATUS
     init_db()
-    task = asyncio.create_task(scheduler())
+    task = None if os.getenv('ATLAS_DISABLE_SCHEDULER') == '1' else asyncio.create_task(scheduler())
     yield
-    task.cancel()
-    try: await task
-    except asyncio.CancelledError: pass
+    if task is not None:
+        task.cancel()
+        try: await task
+        except asyncio.CancelledError: pass
 
 app = FastAPI(title="Atlas Spot Paper API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv("ATLAS_CORS","*").split(","), allow_methods=["*"], allow_headers=["*"])
