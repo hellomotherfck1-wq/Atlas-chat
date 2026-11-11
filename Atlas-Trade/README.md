@@ -22,6 +22,12 @@ Bu depo, Grok Bot üzerinde hızlı ve güvenli bir trading desk kurman için ha
 
 ---
 
+## Çalışan uygulama (ilk sürüm)
+
+Uygulama kaynak kodu `app/` klasöründedir. Kurulum, test ve güvenlik sınırları için [uygulama kılavuzuna](app/README.md) bakın. Hızlı başlatma: `cd Atlas-Trade/app && docker compose up --build`. Arayüz `http://localhost:5173`, API `http://localhost:8000/docs` adresindedir.
+
+> Bu ilk sürüm deterministik teknik kurallarla çalışır; harici LLM ajanı veya haber servisi değildir. Yalnızca paper trading yapar, gerçek emir göndermez.
+
 ## Hızlı Başlangıç
 
 1. Bu depoyu klonla veya dosyaları Grok Bot’un workspace’ine koy.
