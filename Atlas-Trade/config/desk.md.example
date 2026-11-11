@@ -1,0 +1,27 @@
+# Atlas Masası — Desk Kaydı
+
+## Genel Bilgiler
+
+- Masa adı: Atlas Masası
+- Kurulum tarihi: 
+- Çalışma modu: Research / Paper / Live
+- Borsa: (Hyperliquid / Binance / diğer)
+
+## Botlar
+
+- Tarayıcı: Aktif
+- Haberci: Aktif
+- Giriş-Çıkış: Aktif
+- Şüpheci: Aktif
+- Risk: Aktif
+- Günlükçü: Aktif
+
+## Risk Dosyası
+
+`desk/risk-limits.md` dosyası kullanılıyor.
+
+## Notlar
+
+- İlk 7 gün sadece research/paper
+- API anahtarı: Sadece trade yetkisi (withdraw yok)
+- Onay mekanizması: Şüpheci + Risk + Kullanıcı onayı zorunlu
