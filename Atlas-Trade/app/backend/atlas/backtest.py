@@ -156,40 +156,39 @@ async def run_backtest(days: int = 90, symbol_limit: int = 10):
             elif high >= position["target"]:
                 close_position(symbol, position["target"], timestamp, "TARGET")
 
-        # Generate signals from candles closed before this bar; fill at this bar's open.
-        for symbol, index in batch:
-            if symbol in open_positions or len(open_positions) >= MAX_OPEN:
-                continue
-            candles = histories[symbol]
-            signal = analyze_klines(candles[:index + 1], symbol)
-            if signal.get("decision") != "AL":
-                continue
-            stop = float(signal["stop"])
-            raw_entry = float(candles[index][1])
-            entry = raw_entry * (1 + SLIPPAGE)
-            if stop >= entry:
-                continue
-            equity = balance
-            risk_cash = equity * RISK_FRACTION
-            quantity = risk_cash / max(entry - stop, entry * 0.001)
-            entry_fee = entry * quantity * FEE
-            committed = entry * quantity + entry_fee
-            used = sum(p["entry"] * p["quantity"] + p["entry_fee"] for p in open_positions.values())
-            if committed > max(0.0, equity - used):
-                continue
-            open_positions[symbol] = {
-                "entry": entry, "stop": stop, "target": float(signal["target"]),
-                "quantity": quantity, "entry_fee": entry_fee, "time": timestamp,
-            }
-
-        # Enforce the same daily/weekly loss brakes after realized losses.
         day = datetime.fromtimestamp(timestamp / 1000, timezone.utc).date()
         day_key = day.isoformat()
         week_key = (day - timedelta(days=day.weekday())).isoformat()
-        if daily_pnl.get(day_key, 0.0) <= -INITIAL_BALANCE * 0.03:
-            continue
-        if weekly_pnl.get(week_key, 0.0) <= -INITIAL_BALANCE * 0.07:
-            continue
+        loss_brake = (daily_pnl.get(day_key, 0.0) <= -INITIAL_BALANCE * 0.03
+                      or weekly_pnl.get(week_key, 0.0) <= -INITIAL_BALANCE * 0.07)
+
+        # Generate signals from candles closed before this bar; fill at this bar's open.
+        if not loss_brake:
+            for symbol, index in batch:
+                if symbol in open_positions or len(open_positions) >= MAX_OPEN:
+                    continue
+                candles = histories[symbol]
+                signal = analyze_klines(candles[:index + 1], symbol)
+                if signal.get("decision") != "AL":
+                    continue
+                stop = float(signal["stop"])
+                raw_entry = float(candles[index][1])
+                entry = raw_entry * (1 + SLIPPAGE)
+                if stop >= entry:
+                    continue
+                equity = balance
+                risk_cash = equity * RISK_FRACTION
+                quantity = risk_cash / max(entry - stop, entry * 0.001)
+                entry_fee = entry * quantity * FEE
+                committed = entry * quantity + entry_fee
+                used = sum(p["entry"] * p["quantity"] + p["entry_fee"] for p in open_positions.values())
+                if committed > max(0.0, equity - used):
+                    continue
+                open_positions[symbol] = {
+                    "entry": entry, "stop": stop, "target": float(signal["target"]),
+                    "quantity": quantity, "entry_fee": entry_fee, "time": timestamp,
+                }
+
 
     # Mark all remaining positions closed at the final available close.
     for symbol in list(open_positions):
