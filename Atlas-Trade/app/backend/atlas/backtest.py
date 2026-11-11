@@ -168,7 +168,7 @@ async def run_backtest(days: int = 90, symbol_limit: int = 10):
                 if symbol in open_positions or len(open_positions) >= MAX_OPEN:
                     continue
                 candles = histories[symbol]
-                signal = analyze_klines(candles[max(0, index - 59):index + 1], symbol)
+                signal = analyze_klines(candles[max(0, index - 60):index], symbol)
                 if signal.get("decision") != "AL":
                     continue
                 stop = float(signal["stop"])
